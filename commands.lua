@@ -89,3 +89,30 @@ computers.terminal.register_command("file",{
 		return "file <mode> <file> (<content>)"
 	end
 })
+
+computers.terminal.register_command("sound",{
+	run = function(params,meta)
+		if not(computers.is_connected("computers:speaker",meta.os_pos,meta.os_pos)) then
+			return "You need to connect a speaker to your computer to play sounds."
+		end
+		if not(#params > 0) then
+			return "sound <name>"
+		end
+		local sounds = {}
+		local found = false
+		for i,v in ipairs(sounds) do
+			if v == params[1] then
+				found = true
+			end
+		end
+
+		if not(found) then
+			return "sound " .. table.concat(sounds, "/")
+		else
+			minetest.sound_play(params[1],{
+				pos = meta.os_pos
+			})
+			return "Done"
+		end
+	end
+})

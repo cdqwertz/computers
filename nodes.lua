@@ -15,6 +15,13 @@ minetest.register_node("computers:display", {
 	groups = {cracky = 1},
 })
 
+minetest.register_node("computers:speaker", {
+	description = "Speaker",
+	tiles = {"computers_computer.png","computers_computer.png", "computers_computer.png","computers_computer.png","computers_computer.png", "computers_speaker.png"},
+	paramtype2 = "facedir",	
+	groups = {cracky = 1},
+})
+
 minetest.register_node("computers:keyboard", {
 	description = "Keyboard",
 	tiles = {"computers_keyboard.png","computers_computer.png"},
@@ -70,7 +77,7 @@ minetest.register_node("computers:io_cable", {
 		connect_top = {{-2/16, -2/16, -2/16, 2/16, 0.5, 2/16}},
 		connect_bottom = {{-2/16, -0.5, -2/16, 2/16, 2/16, 2/16}},
 	},
-	connects_to = {"computers:io_cable","computers:computer","computers:display","computers:keyboard"},
+	connects_to = {"computers:io_cable","computers:computer","computers:display","computers:keyboard","computers:speaker"},
 })
 
 minetest.register_node("computers:network_cable", {
