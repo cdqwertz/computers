@@ -116,3 +116,55 @@ computers.terminal.register_command("sound",{
 		end
 	end
 })
+
+computers.terminal.register_command("items",{
+	run = function(params,meta)
+		if not(computers.is_connected("computers:chest",meta.os_pos,meta.os_pos)) then
+			return "You need to connect a chest to your computer to use this command."
+		end
+		if not(#params > 0) then
+			return "items <action>"
+		end
+
+		local p = computers.is_connected("computers:chest",meta.os_pos,meta.os_pos)
+		if params[1] == "contain" then
+			if not(#params > 1) then
+				return "items contains <item>"
+			end
+
+			for i,v in ipairs(p) do
+				local meta = minetest.get_meta(v)
+				local inv = meta:get_inventory()
+				
+				if inv:contains_item("main", params[2]) then
+					return true
+				end
+			end
+			return false
+		elseif params[1] == "drop" then
+			if not(#params > 2) then
+				return "items drop <item> <count>"
+			end
+
+			for i,v in ipairs(p) do
+				local meta = minetest.get_meta(v)
+				local inv = meta:get_inventory()
+				
+				if inv:contains_item("main", params[2] .. " " .. params[3]) then	
+					inv:remove_item("main", params[2] .. " " .. params[3])
+					minetest.add_item(vector.add(v, vector.new(0,1,0)), params[2] .. " " .. params[3])
+					return true
+				end
+			end
+			return false
+		end
+
+		return "items <action>"
+	end
+})
+
+computers.terminal.register_command("user",{
+	run = function(params,meta)
+		return meta.player_name
+	end
+})

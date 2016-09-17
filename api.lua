@@ -83,29 +83,62 @@ function computers.terminal.run(cmd, player_name)
 	local name = ""
 	local params = {}
 
+	local a = 1
+	local b = 1
+	local cmd2 = ""
+
 	local str = ""
 	local is_str = false
 	local counter = 1
 	string.gsub(cmd, ".", function(v)
-		if not(is_str) then
-			if v == "\"" then
-				is_str = true
-			elseif v == " " then
-				if counter == 1 then
-					name = str
+		if a == b then
+			if not(is_str) then
+				if v == "(" then
+					if a == b then
+						cmd2 = ""
+					end
+					a = a + 1
+				elseif v == "\"" then
+					is_str = true
+				elseif v == " " then
+					if counter == 1 then
+						name = str
+						str = ""
+						counter = counter + 1
+					else
+						if (str ~= "") then
+							table.insert(params, str)
+							str = ""
+							counter = counter + 1
+						end
+					end
 				else
-					table.insert(params, str)
+					str = str..v
 				end
-				str = ""
-				counter = counter + 1
 			else
-				str = str..v
+				if v == "\"" then
+					is_str = false
+				else
+					str = str..v
+				end
 			end
 		else
-			if v == "\"" then
-				is_str = false
+			if v == "(" then
+				if a == b then
+					cmd2 = ""
+				else
+					cmd2 = cmd2 .. v
+				end
+				a = a + 1
+			elseif v == ")" then
+				a = a - 1	
+				if a == b then
+					table.insert(params, computers.terminal.run(cmd2, player_name))
+				else
+					cmd2 = cmd2 .. v
+				end
 			else
-				str = str..v
+				cmd2 = cmd2 .. v
 			end
 		end
 	end)
@@ -169,17 +202,29 @@ function computers.is_connected(block,pos,from)
 		vector.new(0,0,-1),
 	}
 
+	local found = false
+	local out = {}
 	for i,v in ipairs(dirs) do
 		if not(vector.equals(vector.add(v,pos),from)) then
 			local name = minetest.get_node(vector.add(v,pos)).name
 			if name == block then
-				return true
+				table.insert(out,vector.add(v,pos))
+				found = true
 			elseif name == "computers:io_cable" then
 				if computers.is_connected(block,vector.add(v,pos),pos) then
-					return true
+					local p = computers.is_connected(block,vector.add(v,pos),pos)
+					for i,v in ipairs(p) do
+						table.insert(out,v)
+					end
+					found = true
 				end
 			end
 		end
 	end
-	return false
+
+	if found then
+		return out
+	end
+
+	return nil
 end
