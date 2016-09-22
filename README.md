@@ -19,6 +19,22 @@ This mod adds computers to your minetest world.
 - file new/set/show *file* (*text*)
 - echo *text*
 - clear
+- sound *name*
+- user
+- items contain/drop *item* *count*
+- after *time* *function*
+
+######Strings
+
+```
+"I am a string!"
+```
+
+######Functions
+
+```
+{echo "hi"}
+```
 
 ###API
 If you want to register a new command, you should use this function:
@@ -35,7 +51,25 @@ computers.terminal.register_command("test",{
 })
 ```
 
+######params
 
+```lua
+computers.terminal.register_command("test",{
+	run = function(params,meta)
+		return params[1]
+	end
+})
+```
+
+######meta
+
+```lua
+computers.terminal.register_command("user",{
+	run = function(params,meta)
+		return meta.player_name
+	end
+})
+```
 
 ###License
 See LICENSE.txt

@@ -91,54 +91,78 @@ function computers.terminal.run(cmd, player_name)
 	local is_str = false
 	local counter = 1
 	string.gsub(cmd, ".", function(v)
-		if a == b then
-			if not(is_str) then
-				if v == "(" then
-					if a == b then
-						cmd2 = ""
-					end
-					a = a + 1
-				elseif v == "\"" then
-					is_str = true
-				elseif v == " " then
-					if counter == 1 then
-						name = str
+		if b == 1 then
+			if a == 1 then
+				if not(is_str) then
+					if v == "(" then
+						if a == 1 then
+							cmd2 = ""
+						end
+						a = a + 1
+					elseif v == "{" then
+						b = b + 1
 						str = ""
-						counter = counter + 1
-					else
-						if (str ~= "") then
-							table.insert(params, str)
+					elseif v == "\"" then
+						is_str = true
+					elseif v == " " then
+						if counter == 1 then
+							name = str
 							str = ""
 							counter = counter + 1
+						else
+							if (str ~= "") then
+								table.insert(params, str)
+								str = ""
+								counter = counter + 1
+							end
 						end
+					else
+						str = str..v
 					end
 				else
-					str = str..v
+					if v == "\"" then
+						is_str = false
+					else
+						str = str..v
+					end
 				end
 			else
-				if v == "\"" then
-					is_str = false
+				if v == "(" then
+					if a == 1 then
+						cmd2 = ""
+					else
+						cmd2 = cmd2 .. v
+					end
+					a = a + 1
+				elseif v == ")" then
+					a = a - 1	
+					if a == 1 then
+						table.insert(params, computers.terminal.run(cmd2, player_name))
+					else
+						cmd2 = cmd2 .. v
+					end
 				else
-					str = str..v
+					cmd2 = cmd2 .. v
 				end
 			end
 		else
-			if v == "(" then
-				if a == b then
-					cmd2 = ""
+			if v == "{" then
+				if b == 1 then
+					str = " "
 				else
-					cmd2 = cmd2 .. v
+					str = str .. v
 				end
-				a = a + 1
-			elseif v == ")" then
-				a = a - 1	
-				if a == b then
-					table.insert(params, computers.terminal.run(cmd2, player_name))
+				b = b +1
+			elseif v == "}" then
+				b = b -1
+				if b == 1 then
+					table.insert(params, str)
+					str = ""
 				else
-					cmd2 = cmd2 .. v
+					str = str .. v
 				end
 			else
-				cmd2 = cmd2 .. v
+				str = str .. v
 			end
 		end
 	end)
@@ -165,7 +189,7 @@ function computers.get_terminal_formspec(name,pos)
 		s = s.."label[0,0;".. table.concat(computers.terminal.instances[name].history, "\n") .."]"
 	end
 	if computers.is_connected("computers:keyboard",pos,pos) then
-		s = s.."field[0.3,5.5;7,1;input;Input;]"
+		s = s.."field[0.3,5.5;7,1;input;Input;;false]"
 		s = s.."button[7,5.2;1,1;btn_run;Run]"
 	end
 	return s
@@ -174,10 +198,11 @@ end
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if formname == "computers:terminal" then
 		local name = player:get_player_name()
-		if fields.btn_run then
+		if fields.btn_run or fields.key_enter_field == "input" then
 			if fields.input then
 				table.insert(computers.terminal.instances[name].history,">>> "..fields.input)
-				if #computers.terminal.instances[name].history > 10 then
+				if #computers.terminal.instances[name].history > 12 then
+					table.remove(computers.terminal.instances[name].history,1)
 					table.remove(computers.terminal.instances[name].history,1)
 				end
 				local output = computers.terminal.run(fields.input, name)

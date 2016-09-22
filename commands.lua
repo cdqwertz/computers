@@ -157,6 +157,17 @@ computers.terminal.register_command("items",{
 				end
 			end
 			return false
+		elseif params[1] == "name" then
+			if not(#params > 1) then
+				return "items name <item>"
+			end
+
+			for n,def in pairs(minetest.registered_items) do
+				if def.description == params[2] then
+					return n
+				end
+			end
+			return nil
 		end
 
 		return "items <action>"
@@ -166,5 +177,17 @@ computers.terminal.register_command("items",{
 computers.terminal.register_command("user",{
 	run = function(params,meta)
 		return meta.player_name
+	end
+})
+
+computers.terminal.register_command("after",{
+	run = function(params,meta)
+		if not(#params > 1) then
+			return "after <time> <function>"
+		end
+		minetest.after(tonumber(params[1]) or 1, function(cmd, player_name)
+			computers.terminal.run(cmd, player_name)
+		end,params[2], meta.player_name)
+		return true
 	end
 })
