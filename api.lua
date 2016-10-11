@@ -171,10 +171,19 @@ function computers.terminal.run(cmd, player_name)
 		return "Command \"" ..name .."\" not found"
 	end
 
-	local meta = {
-		player_name = player_name,
-		os_pos = computers.terminal.instances[player_name].os
-	}
+	local meta = {}
+
+	if player_name.x or player_name.y or player_name.z then
+		meta = {
+			player_name = "",
+			os_pos = player_name
+		}
+	else
+		meta = {
+			player_name = player_name,
+			os_pos = computers.terminal.instances[player_name].os
+		}
+	end
 	
 	return computers.terminal.commands[name].run(params, meta)
 end

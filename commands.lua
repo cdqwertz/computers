@@ -61,7 +61,7 @@ computers.terminal.register_command("cd",{
 computers.terminal.register_command("file",{
 	run = function(params,meta)
 		if not(#params > 1) then
-			return
+			return "file <mode> <file>"
 		end
 		if not(computers.terminal.instances[meta.player_name]) then
 			return "Error terminal not found"
@@ -185,9 +185,20 @@ computers.terminal.register_command("after",{
 		if not(#params > 1) then
 			return "after <time> <function>"
 		end
-		minetest.after(tonumber(params[1]) or 1, function(cmd, player_name)
-			computers.terminal.run(cmd, player_name)
-		end,params[2], meta.player_name)
+		minetest.after(tonumber(params[1]) or 1, function(cmd, os_pos)
+			computers.terminal.run(cmd, os_pos)
+		end,params[2], meta.os_pos)
 		return true
+	end
+})
+
+computers.terminal.register_command("commands",{
+	run = function(params,meta)
+		local x = {}
+		for n,v in pairs(computers.terminal.commands) do
+			table.insert(x, n)
+		end
+
+		return table.concat(x, ", ")
 	end
 })

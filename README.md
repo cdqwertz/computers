@@ -7,6 +7,7 @@ This mod adds computers to your minetest world.
 - Computer
 - Keyboard
 - Display
+- Speaker
 
 ######Cables
 - IO Cable
@@ -14,6 +15,7 @@ This mod adds computers to your minetest world.
 - Power Cable (Useless)
 
 ###Commands
+- commands
 - cd *folder*/..
 - list
 - file new/set/show *file* (*text*)
