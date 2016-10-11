@@ -12,9 +12,10 @@ function computers.os.new()
 					["home"] = "home/root"
 				}
 			}
-
-			
 		},
+
+		messages = {},
+		events = {},
 
 		info = {
 			system_name = "?",
@@ -39,6 +40,18 @@ function computers.os.set_path(os,path,x)
 	end
 	output = x
 	return output
+end
+
+function computers.os.trigger_event(os,pos,event)
+	if not(os) then
+		return
+	end
+
+	if not(event) or not(os.events[event]) then
+		return
+	end
+
+	return computers.terminal.run(os.events[event], pos)
 end
 
 function computers.terminal.new(name,pos)
@@ -261,4 +274,72 @@ function computers.is_connected(block,pos,from)
 	end
 
 	return nil
+end
+
+function computers.network.get_computers(pos,from)
+	local dirs = {
+		vector.new(1,0,0),
+		vector.new(-1,0,0),
+
+		vector.new(0,1,0),
+		vector.new(0,-1,0),
+
+		vector.new(0,0,1),
+		vector.new(0,0,-1),
+	}
+
+	local found = false
+	local out = {}
+	for i,v in ipairs(dirs) do
+		if not(vector.equals(vector.add(v,pos),from)) then
+			local name = minetest.get_node(vector.add(v,pos)).name
+			if name == "computers:computer" then
+				local add_item = true
+
+				for _,v2 in ipairs(out) do
+					if vector.equals(vector.add(v,pos), v2) then
+						add_item = false
+						break
+					end
+				end
+				
+				if add_item then
+					table.insert(out,vector.add(v,pos))
+				end
+
+				found = true
+			elseif name == "computers:network_cable" then
+				if computers.network.get_computers(vector.add(v,pos),pos) then
+					local p = computers.network.get_computers(vector.add(v,pos),pos)
+					for i,v in ipairs(p) do
+						table.insert(out,v)
+					end
+					found = true
+				end
+			end
+		end
+	end
+
+	if found then
+		return out
+	end
+
+	return nil
+end
+
+function computers.network.send(pos,msg)
+	local clients = computers.network.get_computers(pos,pos)
+	for i,v in ipairs(clients) do
+		local os = nil
+		for p,_ in pairs(computers.os.instances) do
+			if vector.equals(v,p) then
+				os = p
+			end
+		end
+
+		if os then
+			table.insert(computers.os.instances[os].messages, msg)
+			computers.os.trigger_event(computers.os.instances[os],os,"network:new_message")
+		end
+	end
 end

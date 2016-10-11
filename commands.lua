@@ -192,6 +192,43 @@ computers.terminal.register_command("after",{
 	end
 })
 
+computers.terminal.register_command("event",{
+	run = function(params,meta)
+		if not(#params > 1) then
+			return "event <name> <function>"
+		end
+
+		computers.os.instances[meta.os_pos].events[params[1]] = params[2]
+		return true
+	end
+})
+
+computers.terminal.register_command("send",{
+	run = function(params,meta)
+		if not(#params > 0) then
+			return "event <message>"
+		end
+
+		computers.network.send(meta.os_pos,params[1])
+		return true
+	end
+})
+
+computers.terminal.register_command("messages",{
+	run = function(params,meta)
+		if not(#params > 0) then
+			return table.concat(computers.os.instances[meta.os_pos].messages, ", ")
+		end
+
+		if params[1] == "new" then
+			local messages = computers.os.instances[meta.os_pos].messages
+			return messages[#messages]
+		end
+
+		return ""
+	end
+})
+
 computers.terminal.register_command("commands",{
 	run = function(params,meta)
 		local x = {}
