@@ -239,3 +239,32 @@ computers.terminal.register_command("commands",{
 		return table.concat(x, ", ")
 	end
 })
+
+computers.terminal.register_command("if",{
+	run = function(params,meta)
+		if not(#params > 1) then
+			return "if <value> <function>"
+		end
+
+		if params[1] == true or params[1] == "true" or minetest.is_yes(params[1]) then
+			computers.terminal.run(params[2], meta.os_pos)
+			return true
+		else
+			return false
+		end
+	end
+})
+
+computers.terminal.register_command("equal",{
+	run = function(params,meta)
+		if not(#params > 1) then
+			return "equals <value 1> <value 2>"
+		end
+
+		if params[1] == params[2] then
+			return true
+		else
+			return false
+		end
+	end
+})
