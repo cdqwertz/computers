@@ -43,11 +43,19 @@ computers.terminal.register_command("cd",{
 		if #params > 0 then
 			if params[1] == ".." then
 				computers.terminal.instances[meta.player_name].path = ""
+				return "Done"
 			else
 				local path = computers.terminal.instances[meta.player_name].path
 				local folder = computers.os.get_path(computers.os.instances[meta.os_pos],path)
 				if folder and folder[params[1]] then
-					computers.terminal.instances[meta.player_name].path = path .. "/" .. params[1]
+					if folder[params[1]].is_file then
+						return "\"" .. params[1] .. "\" is a file."
+					end
+					if computers.terminal.instances[meta.player_name].path == "" then
+						computers.terminal.instances[meta.player_name].path = params[1]
+					else
+						computers.terminal.instances[meta.player_name].path = path .. "/" .. params[1]
+					end
 					return "Done"
 				else
 					return "Folder \""..params[1].."\" does not exist."
@@ -63,27 +71,44 @@ computers.terminal.register_command("file",{
 		if not(#params > 1) then
 			return "file <mode> <file>"
 		end
-		if not(computers.terminal.instances[meta.player_name]) then
-			return "Error terminal not found"
+		local path = ""
+
+		if meta.player_name ~= "" and meta.player_name then
+			path = computers.terminal.instances[meta.player_name].path
 		end
-		local path = computers.terminal.instances[meta.player_name].path
-		local folder = computers.os.get_path(computers.os.instances[meta.os_pos],path)
-		if not(folder) then
-			return "Could not find folder \"" .. path .. "\""
+
+		if path and path ~= "" then
+			path = path .. "/" .. params[2]
+		else
+			path = params[2]
 		end
+		print("[computers] Path : " ..path)
+		local file = computers.os.get_path(computers.os.instances[meta.os_pos],path)
 		if params[1] == "new" then
-			folder[params[2]] = ""
-			computers.os.set_path(computers.os.instances[meta.os_pos],path,folder)
-			return "Created new file \"" .. params[2] .. "\"" 
+			new_file = {is_file = true, content = ""}
+			computers.os.set_file(computers.os.instances[meta.os_pos],path,new_file)
+			return "Created new file \"" .. path .. "\"" 
 		elseif params[1] == "set" then
+			if not(file) then
+				return "Could not find file \"" .. path .. "\""
+			end
 			if not(#params > 2) then
 				return "file set <file> <content>"
 			end
-			folder[params[2]] = params[3]
-			computers.os.set_path(computers.os.instances[meta.os_pos],path,folder)
+			if file.readonly then
+				return "You are not allowed to change \"" .. path .. "\"."
+			end
+			file.content = params[3]
+			computers.os.set_path(computers.os.instances[meta.os_pos],path,file)
 			return "Done" 
 		elseif params[1] == "show" then
-			return folder[params[2]]
+			if not(file) then
+				return "Could not find file \"" .. path .. "\""
+			end
+			if not(file.is_file) then
+				return
+			end
+			return file.content
 		end
 
 		return "file <mode> <file> (<content>)"

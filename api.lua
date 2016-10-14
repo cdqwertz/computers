@@ -2,15 +2,9 @@ function computers.os.new()
 	return ({
 		filesystem = {
 			["home"] = {
-				["root"] = {
-					
-				}
 			},
 			
 			["users"] = {
-				["root"] = {
-					["home"] = "home/root"
-				}
 			}
 		},
 
@@ -42,6 +36,19 @@ function computers.os.set_path(os,path,x)
 	return output
 end
 
+function computers.os.set_file(os,path,file)
+	local output = os.filesystem
+	local file_name = path:split("/")[#path:split("/")]
+	for i,v in ipairs(path:split("/")) do
+		if i == #path:split("/") then
+			break
+		end
+		output = output[v]
+	end
+	output[file_name] = file
+	return output
+end
+
 function computers.os.trigger_event(os,pos,event)
 	if not(os) then
 		return
@@ -70,7 +77,7 @@ function computers.terminal.new(name,pos)
 
 	if not(computers.os.instances[pos].filesystem["home"][name]) then
 		computers.os.instances[pos].filesystem["home"][name] = {}
-		computers.os.instances[pos].filesystem["users"][name] = {["home"] = "home/"..name}
+		computers.os.instances[pos].filesystem["users"][name] = {["home"] = {is_file = true, readonly = true, content = "home/"..name}}
 	end
 
 	return({
