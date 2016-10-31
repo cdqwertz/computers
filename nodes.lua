@@ -8,11 +8,29 @@ minetest.register_node("computers:computer", {
 	end
 })
 
+minetest.register_craft({
+	output = "computers:computer",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:mese", "default:steel_ingot"},
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"}
+	},
+})
+
 minetest.register_node("computers:display", {
 	description = "Display",
 	tiles = {"computers_computer.png","computers_computer.png", "computers_computer.png","computers_computer.png","computers_computer.png", "computers_display.png"},
 	paramtype2 = "facedir",	
 	groups = {cracky = 1},
+})
+
+minetest.register_craft({
+	output = "computers:display",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:meselamp", "default:steel_ingot"},
+		{"default:steel_ingot", "default:mese_crystal", "default:steel_ingot"}
+	},
 })
 
 minetest.register_node("computers:speaker", {
@@ -52,6 +70,15 @@ minetest.register_node("computers:chest", {
 	end,
 })
 
+minetest.register_craft({
+	output = "computers:chest",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:chest", "default:steel_ingot"},
+		{"default:steel_ingot", "default:mese_crystal", "default:steel_ingot"}
+	},
+})
+
 minetest.register_node("computers:keyboard", {
 	description = "Keyboard",
 	tiles = {"computers_keyboard.png","computers_computer.png"},
@@ -65,6 +92,14 @@ minetest.register_node("computers:keyboard", {
 		fixed = {
 			{-0.5, -0.5, -3/16, 0.5, -6/16, 0.5}
 		},
+	},
+})
+
+minetest.register_craft({
+	output = "computers:keyboard",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"default:mese_crystal", "default:mese_crystal", "default:mese_crystal"}
 	},
 })
 
@@ -110,6 +145,15 @@ minetest.register_node("computers:io_cable", {
 	connects_to = {"computers:io_cable","computers:computer","computers:display","computers:keyboard","computers:speaker","computers:chest"},
 })
 
+minetest.register_craft({
+	output = "computers:io_cable 12",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"default:mese_crystal", "default:mese_crystal", "default:mese_crystal"},
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"}
+	},
+})
+
 minetest.register_node("computers:network_cable", {
 	description = "Network Cable",
 	tiles = {"computers_network_cable.png"},
@@ -129,4 +173,13 @@ minetest.register_node("computers:network_cable", {
 		connect_bottom = {{-2/16, -0.5, -2/16, 2/16, 2/16, 2/16}},
 	},
 	connects_to = {"computers:computer","computers:network_cable"},
+})
+
+minetest.register_craft({
+	output = "computers:network_cable 6",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+		{"computers:io_cable", "computers:io_cable", "computers:io_cable"},
+		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"}
+	},
 })
