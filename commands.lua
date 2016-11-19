@@ -1,7 +1,12 @@
 computers.terminal.register_command("echo",{
 	run = function(params,meta)
+		if not(computers.terminal.instances[meta.player_name]) then
+			return false
+		end
+
 		if #params > 0 then
-			return params[1]
+			table.insert(computers.terminal.instances[meta.player_name].history, params[1])
+			return nil
 		end
 		return "echo <text>"
 	end
@@ -13,7 +18,21 @@ computers.terminal.register_command("clear",{
 			return "Error terminal not found"
 		end
 		computers.terminal.instances[meta.player_name].history = {}
-		return ""
+		return nil
+	end
+})
+
+computers.terminal.register_command("var",{
+	run = function(params,meta)
+		if not(computers.os.instances[meta.os_pos]) then
+			return false
+		end
+
+		if #params > 1 then
+			computers.os.instances[meta.os_pos].vars["@" .. params[1]] = params[2] 
+			return nil
+		end
+		return "var <name> <value>"
 	end
 })
 
@@ -210,9 +229,14 @@ computers.terminal.register_command("after",{
 		if not(#params > 1) then
 			return "after <time> <function>"
 		end
-		minetest.after(tonumber(params[1]) or 1, function(cmd, os_pos)
-			computers.terminal.run(cmd, os_pos)
-		end,params[2], meta.os_pos)
+		minetest.after(tonumber(params[1]) or 1, function(cmd, os_pos, player_name)
+			if computers.terminal.instances[player_name] then
+				computers.terminal.run(cmd, player_name)
+				minetest.show_formspec(player_name, "computers:terminal", computers.get_terminal_formspec(player_name,computers.terminal.instances[player_name].os))
+			else
+				computers.terminal.run(cmd, os_pos)
+			end
+		end,params[2], meta.os_pos, meta.player_name)
 		return true
 	end
 })
@@ -272,7 +296,11 @@ computers.terminal.register_command("if",{
 		end
 
 		if params[1] == true or params[1] == "true" or minetest.is_yes(params[1]) then
-			computers.terminal.run(params[2], meta.os_pos)
+			if computers.terminal.instances[meta.player_name] then
+				computers.terminal.run(params[2], meta.player_name)
+			else
+				computers.terminal.run(params[2], meta.os_pos)
+			end
 			return true
 		else
 			return false

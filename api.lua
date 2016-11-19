@@ -15,6 +15,9 @@ function computers.os.new()
 			system_name = "?",
 			system_version = "0.0.0",
 			system_author = "cdqwertz"
+		},
+		
+		vars = {
 		}
 	})
 end
@@ -98,6 +101,22 @@ function computers.terminal.run(cmd, player_name)
 		return
 	end
 
+	local meta = {}
+
+	if player_name.x or player_name.y or player_name.z then
+		meta = {
+			player_name = "",
+			os_pos = player_name,
+			os = computers.os.instances[player_name]
+		}
+	else
+		meta = {
+			player_name = player_name,
+			os_pos = computers.terminal.instances[player_name].os,
+			os = computers.os.instances[computers.terminal.instances[player_name].os]
+		}
+	end
+
 	cmd = cmd .. " "
 
 	local name = ""
@@ -133,7 +152,14 @@ function computers.terminal.run(cmd, player_name)
 								counter = counter + 1
 							else
 								if (str ~= "") then
-									table.insert(params, str)
+									if string.find(str, "@") == 1 and
+									   meta.os and
+									   meta.os.vars and
+									   meta.os.vars[str] then
+										table.insert(params, meta.os.vars[str])
+									else
+										table.insert(params, str)
+									end
 									str = ""
 									counter = counter + 1
 								end
@@ -211,20 +237,6 @@ function computers.terminal.run(cmd, player_name)
 		return "Command \"" ..name .."\" not found"
 	end
 
-	local meta = {}
-
-	if player_name.x or player_name.y or player_name.z then
-		meta = {
-			player_name = "",
-			os_pos = player_name
-		}
-	else
-		meta = {
-			player_name = player_name,
-			os_pos = computers.terminal.instances[player_name].os
-		}
-	end
-	
 	local output = computers.terminal.commands[name].run(params, meta)
 
 	print("[computers] run command : " .. name .. " Output : " .. tostring(output))
@@ -273,7 +285,15 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 end)
 
-function computers.is_connected(block,pos,from)
+function computers.is_connected(block, pos, from, range)
+	if range == nil then
+		range = 10
+	end
+
+	if range < 1 then
+		return nil
+	end
+
 	local dirs = {
 		vector.new(1,0,0),
 		vector.new(-1,0,0),
@@ -294,8 +314,8 @@ function computers.is_connected(block,pos,from)
 				table.insert(out,vector.add(v,pos))
 				found = true
 			elseif name == "computers:io_cable" then
-				if computers.is_connected(block,vector.add(v,pos),pos) then
-					local p = computers.is_connected(block,vector.add(v,pos),pos)
+				if computers.is_connected(block,vector.add(v,pos),pos, range - 1) then
+					local p = computers.is_connected(block, vector.add(v,pos), pos, range - 1)
 					for i,v in ipairs(p) do
 						table.insert(out,v)
 					end
